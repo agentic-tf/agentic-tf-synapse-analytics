@@ -11,3 +11,11 @@ resource "azurerm_synapse_workspace" "this" {
     type = "SystemAssigned"
   }
 }
+
+resource "azurerm_synapse_sql_pool" "this" {
+  name                 = "${var.name}-sqlpool"
+  synapse_workspace_id = azurerm_synapse_workspace.this.id
+  sku_name             = var.sql_pool_sku
+  create_mode          = "Default"
+  tags                 = var.tags
+}
