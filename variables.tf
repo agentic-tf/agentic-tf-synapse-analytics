@@ -53,8 +53,8 @@ variable "spark_node_size" {
 
 variable "spark_executors_min" {
   type        = number
-  description = "Minimum number of Spark executors (auto-scale)."
-  default     = 1
+  description = "Minimum number of Spark executors (auto-scale). Azure minimum is 3."
+  default     = 3
 }
 
 variable "spark_executors_max" {

@@ -26,7 +26,7 @@ resource "azurerm_synapse_sql_pool" "this" {
 # Spark Pool — for data engineering (ETL/ELT)
 resource "azurerm_synapse_spark_pool" "this" {
   count                = var.enable_spark_pool ? 1 : 0
-  name                 = replace("${var.name}-spark", "-", "")
+  name                 = "spark"
   synapse_workspace_id = azurerm_synapse_workspace.this.id
   node_size_family     = "MemoryOptimized"
   node_size            = var.spark_node_size
