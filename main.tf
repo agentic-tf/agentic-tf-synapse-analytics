@@ -12,10 +12,33 @@ resource "azurerm_synapse_workspace" "this" {
   }
 }
 
+# Dedicated SQL Pool — for data analytics (DW queries)
 resource "azurerm_synapse_sql_pool" "this" {
+  count                = var.enable_sql_pool ? 1 : 0
   name                 = "${var.name}-sqlpool"
   synapse_workspace_id = azurerm_synapse_workspace.this.id
   sku_name             = var.sql_pool_sku
   create_mode          = "Default"
   tags                 = var.tags
+}
+
+# Spark Pool — for data engineering (ETL/ELT)
+resource "azurerm_synapse_spark_pool" "this" {
+  count                = var.enable_spark_pool ? 1 : 0
+  name                 = replace("${var.name}-spark", "-", "")
+  synapse_workspace_id = azurerm_synapse_workspace.this.id
+  node_size_family     = "MemoryOptimized"
+  node_size            = var.spark_node_size
+  node_count           = 0
+  spark_version        = "3.4"
+  tags                 = var.tags
+
+  auto_scale {
+    min_node_count = var.spark_executors_min
+    max_node_count = var.spark_executors_max
+  }
+
+  auto_pause {
+    delay_in_minutes = var.spark_pause_delay_min
+  }
 }
