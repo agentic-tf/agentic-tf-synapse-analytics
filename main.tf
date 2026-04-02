@@ -19,6 +19,7 @@ resource "azurerm_synapse_sql_pool" "this" {
   synapse_workspace_id = azurerm_synapse_workspace.this.id
   sku_name             = var.sql_pool_sku
   create_mode          = "Default"
+  storage_account_type = "GRS"
   tags                 = var.tags
 }
 
@@ -29,7 +30,6 @@ resource "azurerm_synapse_spark_pool" "this" {
   synapse_workspace_id = azurerm_synapse_workspace.this.id
   node_size_family     = "MemoryOptimized"
   node_size            = var.spark_node_size
-  node_count           = 0
   spark_version        = "3.4"
   tags                 = var.tags
 
