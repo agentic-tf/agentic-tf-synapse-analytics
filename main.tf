@@ -1,3 +1,8 @@
+locals {
+  # Strip non-alphanumeric, take first 11 chars, append pool suffix (max 15 chars)
+  name_clean = substr(replace(var.name, "/[^a-z0-9]/", ""), 0, 11)
+}
+
 resource "azurerm_synapse_workspace" "this" {
   name                                 = var.name
   resource_group_name                  = var.resource_group_name
@@ -15,7 +20,7 @@ resource "azurerm_synapse_workspace" "this" {
 # Dedicated SQL Pool — for data analytics (DW queries)
 resource "azurerm_synapse_sql_pool" "this" {
   count                = var.enable_sql_pool ? 1 : 0
-  name                 = "${var.name}-sqlpool"
+  name                 = "${local.name_clean}sql"
   synapse_workspace_id = azurerm_synapse_workspace.this.id
   sku_name             = var.sql_pool_sku
   create_mode          = "Default"
@@ -26,7 +31,7 @@ resource "azurerm_synapse_sql_pool" "this" {
 # Spark Pool — for data engineering (ETL/ELT)
 resource "azurerm_synapse_spark_pool" "this" {
   count                = var.enable_spark_pool ? 1 : 0
-  name                 = "spark"
+  name                 = "${local.name_clean}spk"
   synapse_workspace_id = azurerm_synapse_workspace.this.id
   node_size_family     = "MemoryOptimized"
   node_size            = var.spark_node_size
