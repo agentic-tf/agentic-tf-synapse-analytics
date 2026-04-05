@@ -7,7 +7,7 @@ locals {
 }
 
 resource "random_password" "synapse_sql" {
-  count   = var.sql_administrator_login_password == null ? 1 : 0
+  count   = var.generate_sql_password ? 1 : 0
   length  = 24
   special = true
 }
@@ -18,7 +18,7 @@ resource "azurerm_synapse_workspace" "this" {
   location                             = var.location
   storage_data_lake_gen2_filesystem_id = var.adls_filesystem_id
   sql_administrator_login              = var.sql_administrator_login
-  sql_administrator_login_password     = coalesce(var.sql_administrator_login_password, try(random_password.synapse_sql[0].result, ""))
+  sql_administrator_login_password     = var.generate_sql_password ? random_password.synapse_sql[0].result : var.sql_administrator_login_password
   tags                                 = var.tags
 
   # ── Security hardening ──────────────────────────────────────────────

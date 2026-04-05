@@ -21,11 +21,17 @@ variable "sql_administrator_login" {
   default     = "sqladmin"
 }
 
+variable "generate_sql_password" {
+  type        = bool
+  description = "Generate a random SQL admin password. Set false and provide sql_administrator_login_password instead."
+  default     = true
+}
+
 variable "sql_administrator_login_password" {
   type        = string
-  description = "SQL administrator login password. If null a random password is generated."
+  description = "SQL administrator login password. Only used when generate_sql_password = false."
   sensitive   = true
-  default     = null
+  default     = ""
 }
 
 variable "aad_admin_login" {
