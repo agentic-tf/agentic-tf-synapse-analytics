@@ -23,23 +23,27 @@ variable "sql_administrator_login" {
 
 variable "sql_administrator_login_password" {
   type        = string
-  description = "SQL administrator login password for the Synapse workspace."
+  description = "SQL administrator login password. If null a random password is generated."
   sensitive   = true
+  default     = null
 }
 
 variable "aad_admin_login" {
   type        = string
-  description = "Entra ID admin display name for the Synapse workspace (I.AZR.0249)."
+  description = "Entra ID admin display name for the Synapse workspace (I.AZR.0249). Defaults to 'sqladmin' for sandbox use."
+  default     = "sqladmin"
 }
 
 variable "aad_admin_object_id" {
   type        = string
-  description = "Entra ID admin object ID for the Synapse workspace."
+  description = "Entra ID admin object ID. Empty string skips AAD admin configuration."
+  default     = ""
 }
 
 variable "aad_admin_tenant_id" {
   type        = string
-  description = "Entra ID tenant ID for the Synapse workspace AAD admin."
+  description = "Entra ID tenant ID for AAD admin. Empty string skips AAD admin configuration."
+  default     = ""
 }
 
 # ── Networking ────────────────────────────────────────────────────────

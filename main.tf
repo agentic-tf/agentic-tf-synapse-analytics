@@ -6,13 +6,19 @@ locals {
   } : var.private_dns_zone_ids
 }
 
+resource "random_password" "synapse_sql" {
+  count   = var.sql_administrator_login_password == null ? 1 : 0
+  length  = 24
+  special = true
+}
+
 resource "azurerm_synapse_workspace" "this" {
   name                                 = var.name
   resource_group_name                  = var.resource_group_name
   location                             = var.location
   storage_data_lake_gen2_filesystem_id = var.adls_filesystem_id
   sql_administrator_login              = var.sql_administrator_login
-  sql_administrator_login_password     = var.sql_administrator_login_password
+  sql_administrator_login_password     = coalesce(var.sql_administrator_login_password, try(random_password.synapse_sql[0].result, ""))
   tags                                 = var.tags
 
   # ── Security hardening ──────────────────────────────────────────────
@@ -22,21 +28,18 @@ resource "azurerm_synapse_workspace" "this" {
   # Managed VNet — isolate data exfiltration paths
   managed_virtual_network_enabled = true
 
+  # I.AZR.0249 — Entra ID only authentication for workspace SQL access
+  azuread_authentication_only = true
+
   # I.AZR.0019 — Managed Identity
   identity {
     type = "SystemAssigned"
   }
-
-  # I.AZR.0249 — Entra ID authentication for workspace resources
-  aad_admin {
-    login     = var.aad_admin_login
-    object_id = var.aad_admin_object_id
-    tenant_id = var.aad_admin_tenant_id
-  }
 }
 
-# ── Transparent Data Encryption (I.AZR.0116) ────────────────────────
+# ── AAD Admin (I.AZR.0249) — conditional on object_id being provided ──
 resource "azurerm_synapse_workspace_sql_aad_admin" "this" {
+  count                = var.aad_admin_object_id != "" ? 1 : 0
   synapse_workspace_id = azurerm_synapse_workspace.this.id
   login                = var.aad_admin_login
   object_id            = var.aad_admin_object_id
