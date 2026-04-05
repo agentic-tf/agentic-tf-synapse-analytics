@@ -1,22 +1,74 @@
+# ── Identity ──────────────────────────────────────────────────────────
 variable "name" {
-  type = string
+  type        = string
+  description = "Synapse workspace name."
 }
+
 variable "location" {
-  type = string
+  type        = string
+  description = "Azure region."
 }
+
 variable "resource_group_name" {
-  type = string
+  type        = string
+  description = "Name of the resource group."
 }
-variable "tags" {
-  type = map(string)
-  default = {}
+
+# ── Authentication ───────────────────────────────────────────────────
+variable "sql_administrator_login" {
+  type        = string
+  description = "SQL administrator login name for the Synapse workspace."
+  default     = "sqladmin"
 }
+
+variable "sql_administrator_login_password" {
+  type        = string
+  description = "SQL administrator login password for the Synapse workspace."
+  sensitive   = true
+}
+
+variable "aad_admin_login" {
+  type        = string
+  description = "Entra ID admin display name for the Synapse workspace (I.AZR.0249)."
+}
+
+variable "aad_admin_object_id" {
+  type        = string
+  description = "Entra ID admin object ID for the Synapse workspace."
+}
+
+variable "aad_admin_tenant_id" {
+  type        = string
+  description = "Entra ID tenant ID for the Synapse workspace AAD admin."
+}
+
+# ── Networking ────────────────────────────────────────────────────────
+variable "private_endpoint_subnet_id" {
+  type        = string
+  description = "Subnet ID for the private endpoint."
+}
+
+variable "virtual_network_id" {
+  type        = string
+  description = "Virtual network ID for private DNS zone link."
+}
+
+variable "create_private_dns_zones" {
+  type        = bool
+  description = "Create private DNS zones for the Synapse private endpoint. Set false if centrally managed."
+  default     = true
+}
+
+variable "private_dns_zone_ids" {
+  type        = map(string)
+  description = "Existing private DNS zone IDs keyed by subresource name when create_private_dns_zones = false."
+  default     = {}
+}
+
+# ── Service-specific ─────────────────────────────────────────────────
 variable "adls_filesystem_id" {
-  type = string
-}
-variable "sql_admin_password" {
-  type = string
-  sensitive = true
+  type        = string
+  description = "ADLS Gen2 filesystem ID used as the workspace default storage."
 }
 
 # --- Dedicated SQL Pool (analytics) ---
@@ -67,4 +119,18 @@ variable "spark_pause_delay_min" {
   type        = number
   description = "Minutes of idle time before the Spark pool auto-pauses."
   default     = 15
+}
+
+# ── Operational ──────────────────────────────────────────────────────
+variable "log_analytics_workspace_id" {
+  type        = string
+  description = "Log Analytics workspace ID for diagnostic logs. Empty string to skip."
+  default     = ""
+}
+
+# ── Tags ─────────────────────────────────────────────────────────────
+variable "tags" {
+  type        = map(string)
+  description = "Resource tags."
+  default     = {}
 }
