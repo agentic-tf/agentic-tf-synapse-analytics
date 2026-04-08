@@ -76,15 +76,21 @@ variable "private_dns_zone_ids" {
 }
 
 # ── Storage ──────────────────────────────────────────────────────────
+variable "create_adls_filesystem" {
+  type        = bool
+  description = "Create an ADLS Gen2 filesystem and lock down the storage account after workspace creation. Requires storage_account_id."
+  default     = false
+}
+
 variable "storage_account_id" {
   type        = string
-  description = "Storage account ID (HNS-enabled). When set, the module creates the ADLS Gen2 filesystem and locks down the storage after workspace creation."
+  description = "Storage account ID (HNS-enabled). Required when create_adls_filesystem = true."
   default     = ""
 }
 
 variable "adls_filesystem_id" {
   type        = string
-  description = "Pre-existing ADLS Gen2 filesystem ID. Only used when storage_account_id is empty."
+  description = "Pre-existing ADLS Gen2 filesystem ID. Only used when create_adls_filesystem = false."
   default     = ""
 }
 
