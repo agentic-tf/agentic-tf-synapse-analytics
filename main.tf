@@ -6,17 +6,26 @@ locals {
   } : var.private_dns_zone_ids
 }
 
+# ── ADLS Gen2 filesystem (created by module when storage_account_id provided) ─
+resource "azurerm_storage_data_lake_gen2_filesystem" "synapse" {
+  count              = var.storage_account_id != "" ? 1 : 0
+  name               = "synapse"
+  storage_account_id = var.storage_account_id
+}
+
+# ── SQL admin password ────────────────────────────────────────────────
 resource "random_password" "synapse_sql" {
   count   = var.generate_sql_password ? 1 : 0
   length  = 24
   special = true
 }
 
+# ── Synapse Workspace ────────────────────────────────────────────────
 resource "azurerm_synapse_workspace" "this" {
   name                                 = var.name
   resource_group_name                  = var.resource_group_name
   location                             = var.location
-  storage_data_lake_gen2_filesystem_id = var.adls_filesystem_id
+  storage_data_lake_gen2_filesystem_id = var.storage_account_id != "" ? azurerm_storage_data_lake_gen2_filesystem.synapse[0].id : var.adls_filesystem_id
   sql_administrator_login              = var.sql_administrator_login
   sql_administrator_login_password     = var.generate_sql_password ? random_password.synapse_sql[0].result : var.sql_administrator_login_password
   tags                                 = var.tags
@@ -35,6 +44,20 @@ resource "azurerm_synapse_workspace" "this" {
   identity {
     type = "SystemAssigned"
   }
+}
+
+# ── Lock down storage after workspace creation ────────────────────────
+# The ADLS filesystem creation and Synapse workspace linking both require
+# data-plane access. Network rules are applied only after the workspace
+# is fully created to avoid race conditions.
+resource "azurerm_storage_account_network_rules" "synapse_lockdown" {
+  count              = var.storage_account_id != "" ? 1 : 0
+  storage_account_id = var.storage_account_id
+  default_action     = "Deny"
+  bypass             = ["AzureServices"]
+  ip_rules           = []
+
+  depends_on = [azurerm_synapse_workspace.this]
 }
 
 # ── AAD Admin (I.AZR.0249) — conditional on object_id being provided ──

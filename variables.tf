@@ -75,10 +75,17 @@ variable "private_dns_zone_ids" {
   default     = {}
 }
 
-# ── Service-specific ─────────────────────────────────────────────────
+# ── Storage ──────────────────────────────────────────────────────────
+variable "storage_account_id" {
+  type        = string
+  description = "Storage account ID (HNS-enabled). When set, the module creates the ADLS Gen2 filesystem and locks down the storage after workspace creation."
+  default     = ""
+}
+
 variable "adls_filesystem_id" {
   type        = string
-  description = "ADLS Gen2 filesystem ID used as the workspace default storage."
+  description = "Pre-existing ADLS Gen2 filesystem ID. Only used when storage_account_id is empty."
+  default     = ""
 }
 
 # --- Dedicated SQL Pool (analytics) ---
