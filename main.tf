@@ -186,7 +186,7 @@ resource "azurerm_monitor_diagnostic_setting" "synapse" {
     category = "IntegrationTriggerRuns"
   }
 
-  metric {
+  enabled_metric {
     category = "AllMetrics"
   }
 }
